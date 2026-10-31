@@ -38,15 +38,30 @@ simstack_upload --model ModelName model_data.json
 ```bash
 simstack_submit --node-name node_name --resource resource inputs.json
 simstack_submit --node-name node_name --resource resource --custom-name custom-name --category category_name inputs.json
+simstack_submit --node-name node_name --resource resource --params params.json inputs.json
 ```
 
-`inputs.json` is a JSON object whose keys are exactly the node's input names. The command writes a `NodeRegistry` row with status `submitted` and prints its id. `--custom-name` and `--category` are optional. The node's stored default parameters are kept, and `--resource` replaces the resource.
+`inputs.json` is a JSON object whose keys are exactly the node's input names. The command writes a `NodeRegistry` row with status `submitted` and prints its id. `--custom-name`, `--category`, and `--params` are optional. The node's stored default parameters are kept, and `--resource` replaces the resource.
+
+`params.json` is a `SlurmParameters` object for this master job. Set the fields you want to change, for example `nodes` and `tasks`. Omitted fields stay as the node stored them. Unknown fields are an error.
+
+```json
+{
+  "nodes": 1,
+  "tasks": 8,
+  "cpus_per_task": 4,
+  "mem": "16G",
+  "time": "04:00:00"
+}
+```
 
 ## simstack_monitor
 
 ```bash
-simstack_monitor --list
-simstack_monitor --list --node-name node_name --status submitted
+simstack_monitor
+simstack_monitor --node-name node_name --status submitted
+simstack_monitor --id 0123456789abcdef01234567
+simstack_monitor --ids 0123456789abcdef01234567,0123456789abcdef01234568
 ```
 
-`--list` prints JSON with `uuid`, `name`, `custom_name`, `category`, and `status` for the jobs in this database. `--node-name` and `--status` each narrow that list. `--status` must be one of the SimStack task statuses (`submitted`, `running`, `slurm_queued`, `slurm_running`, `retrieved`, `timeout`, `failed`, `completed`, `recovered`, `terminating`).
+Every invocation prints JSON with `uuid`, `name`, `custom_name`, `category`, and `status`. With no selectors it includes the jobs in this database. `--node-name` and `--status` narrow that list. `--id` keeps one uuid and `--ids` keeps a comma-separated list, in the order given. A uuid that does not match is an error. `--status` must be one of the SimStack task statuses (`submitted`, `running`, `slurm_queued`, `slurm_running`, `retrieved`, `timeout`, `failed`, `completed`, `recovered`, `terminating`).

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import inspect
 import sys
+from typing import Any
 
 from simstack_control.inputs import require_input_document
 from simstack_control.jsonutil import load_json_file
@@ -15,8 +16,32 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--resource", required=True, help="Execution resource.")
     parser.add_argument("--custom-name", help="Optional display name.")
     parser.add_argument("--category", help="Optional category.")
+    parser.add_argument(
+        "--params",
+        help="JSON object of SlurmParameters for this job, such as nodes and tasks.",
+    )
     parser.add_argument("inputs", help="JSON object keyed by the node's input names.")
     return parser
+
+
+def slurm_parameter_overrides(payload: Any) -> dict:
+    from pydantic import ValidationError
+    from simstack.models.parameters import SlurmParameters
+
+    if not isinstance(payload, dict):
+        raise ValueError("--params must be a JSON object of SlurmParameters fields")
+    if len(payload) == 0:
+        raise ValueError("--params must set at least one SlurmParameters field")
+    unknown = [key for key in payload if key not in SlurmParameters.model_fields]
+    if unknown:
+        raise ValueError(
+            "--params has unknown SlurmParameters fields: " + ", ".join(unknown)
+        )
+    try:
+        SlurmParameters.model_validate(payload)
+    except ValidationError as exc:
+        raise ValueError(f"--params is not valid SlurmParameters: {exc}") from exc
+    return dict(payload)
 
 
 def _nonempty_optional(flag: str, value: str | None) -> str | None:
@@ -27,15 +52,20 @@ def _nonempty_optional(flag: str, value: str | None) -> str | None:
     return value
 
 
-async def _main() -> None:
-    args = build_parser().parse_args()
-    if args.node_name.strip() == "":
+async def submit_inputs(
+    node_name: str,
+    resource: str,
+    document: Any,
+    custom_name: str | None = None,
+    category: str | None = None,
+    slurm_parameters: Any = None,
+) -> str:
+    if not isinstance(node_name, str) or node_name.strip() == "":
         raise ValueError("--node-name must be a non-empty string")
-    if args.resource.strip() == "":
+    if not isinstance(resource, str) or resource.strip() == "":
         raise ValueError("--resource must be a non-empty string")
-    custom_name = _nonempty_optional("--custom-name", args.custom_name)
-    category = _nonempty_optional("--category", args.category)
-    document = load_json_file(args.inputs)
+    custom_name = _nonempty_optional("--custom-name", custom_name)
+    category = _nonempty_optional("--category", category)
 
     from odmantic import Model
     from simstack.core.definitions import TaskStatus
@@ -51,13 +81,13 @@ async def _main() -> None:
     async with simstack_session() as context:
         node_model = None
         if context.node_mappings is not None:
-            node_model = context.node_mappings.get_by_name(args.node_name)
+            node_model = context.node_mappings.get_by_name(node_name)
         if node_model is None:
             node_model = await context.db.find_one(
-                NodeModel, NodeModel.name == args.node_name
+                NodeModel, NodeModel.name == node_name
             )
         if node_model is None:
-            raise ValueError(f"Node {args.node_name} is not in the node table")
+            raise ValueError(f"Node {node_name} is not in the node table")
 
         wrapped = await import_function(node_model.function_mapping, context.db)
         if wrapped is None:
@@ -69,13 +99,13 @@ async def _main() -> None:
                 continue
             if parameter.kind == inspect.Parameter.VAR_POSITIONAL:
                 raise ValueError(
-                    f"Node {args.node_name} has *{name}; inputs.json cannot bind it"
+                    f"Node {node_name} has *{name}; inputs.json cannot bind it"
                 )
             parameter_names.append(name)
         mapping_names = [item.name for item in node_model.input_mappings]
         if parameter_names != mapping_names:
             raise ValueError(
-                f"Node {args.node_name} input mappings {mapping_names} "
+                f"Node {node_name} input mappings {mapping_names} "
                 f"do not match function parameters {parameter_names}"
             )
         inputs = require_input_document(document, mapping_names)
@@ -96,12 +126,22 @@ async def _main() -> None:
             instances.append(instance)
 
         if not isinstance(node_model.default_parameters, Parameters):
-            raise ValueError(f"Node {args.node_name} has no default parameters")
+            raise ValueError(f"Node {node_name} has no default parameters")
         parameter_data = node_model.default_parameters.model_dump()
-        parameter_data["resource"] = args.resource
+        parameter_data["resource"] = resource
+        if slurm_parameters is not None:
+            current = parameter_data.get("slurm_parameters")
+            if "slurm_parameters" in parameter_data and not isinstance(current, dict):
+                raise ValueError(f"Node {node_name} slurm_parameters is not an object")
+            if current is None:
+                current = {}
+            parameter_data["slurm_parameters"] = {
+                **current,
+                **slurm_parameter_overrides(slurm_parameters),
+            }
         parameters = Parameters.model_validate(parameter_data)
-        if parameters.resource != args.resource:
-            raise ValueError(f"Resource {args.resource!r} was not stored")
+        if parameters.resource != resource:
+            raise ValueError(f"Resource {resource!r} was not stored")
 
         arg_hash = compute_arg_hash(instances)
         references = []
@@ -142,8 +182,26 @@ async def _main() -> None:
         )
         saved = await context.db.save(registry)
         if saved is None or saved.id is None:
-            raise ValueError(f"Saving node {args.node_name} did not return an id")
-        print(saved.id)
+            raise ValueError(f"Saving node {node_name} did not return an id")
+        return str(saved.id)
+
+
+async def _main() -> None:
+    args = build_parser().parse_args()
+    document = load_json_file(args.inputs)
+    params_path = _nonempty_optional("--params", args.params)
+    print(
+        await submit_inputs(
+            args.node_name,
+            args.resource,
+            document,
+            custom_name=args.custom_name,
+            category=args.category,
+            slurm_parameters=(
+                None if params_path is None else load_json_file(params_path)
+            ),
+        )
+    )
 
 
 def main() -> None:
