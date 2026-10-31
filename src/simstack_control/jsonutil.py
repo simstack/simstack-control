@@ -25,7 +25,7 @@ def to_jsonable(value: Any) -> Any:
     if isinstance(value, BaseModel):
         return to_jsonable(value.model_dump())
     if isinstance(value, bytes):
-        raise ValueError("Cannot encode bytes as JSON")
+        return {"byte_length": len(value)}
     raise ValueError(f"Cannot encode {type(value).__name__} as JSON")
 
 

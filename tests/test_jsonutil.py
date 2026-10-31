@@ -16,6 +16,5 @@ def test_converts_object_ids_and_datetimes():
     }
 
 
-def test_rejects_bytes():
-    with pytest.raises(ValueError, match="bytes"):
-        to_jsonable({"blob": b"abc"})
+def test_reports_byte_length_without_embedding_the_bytes():
+    assert to_jsonable({"content": b"abc"}) == {"content": {"byte_length": 3}}

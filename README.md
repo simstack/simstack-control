@@ -20,9 +20,10 @@ simstack_inspect --list-models
 simstack_inspect --dump-model ModelName
 simstack_inspect --dump-model-recursive ModelName
 simstack_inspect --model-data ModelName 0123456789abcdef01234567
+simstack_inspect --node-id 0123456789abcdef01234567
 ```
 
-`--list-nodes` accepts `--lists-nodes` as the same flag. `--dump-model` prints the `json_schema` stored on that model-table row. `--dump-model-recursive` also prints each nested model schema. `--model-data` prints the collection document with that id.
+`--list-nodes` accepts `--lists-nodes` as the same flag. `--dump-model` prints the `json_schema` stored on that model-table row. `--dump-model-recursive` also prints each nested model schema. `--model-data` prints the collection document with that id. `--node-id` prints the job's inputs, outputs, and `child_uuids`. File stacks are omitted.
 
 ## simstack_upload
 
@@ -48,4 +49,4 @@ simstack_monitor --list
 simstack_monitor --list --node-name node_name --status submitted
 ```
 
-`--list` prints JSON for the jobs in this database. `--node-name` and `--status` each narrow that list. `--status` must be one of the SimStack task statuses (`submitted`, `running`, `slurm_queued`, `slurm_running`, `retrieved`, `timeout`, `failed`, `completed`, `recovered`, `terminating`).
+`--list` prints JSON with `uuid`, `name`, `custom_name`, `category`, and `status` for the jobs in this database. `--node-name` and `--status` each narrow that list. `--status` must be one of the SimStack task statuses (`submitted`, `running`, `slurm_queued`, `slurm_running`, `retrieved`, `timeout`, `failed`, `completed`, `recovered`, `terminating`).

@@ -5,6 +5,8 @@ requires-python = "==3.12.*"
 [manifest]
 constraints = [{ name = "numpy", specifier = "==2.5.0" }]
 overrides = [
+    { name = "molecular-qm-models", git = "https://github.com/simstack/molecular_qm_models.git" },
+    { name = "molecular-qm-orca", git = "https://github.com/simstack/molecular_qm_orca.git" },
     { name = "numpy", specifier = "==2.5.0" },
     { name = "simstack", git = "https://github.com/simstack/simstack.git?rev=ww%2Fnew-features" },
 ]
@@ -251,6 +253,25 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "molecular-qm-models"
+version = "0.6.0"
+source = { git = "https://github.com/simstack/molecular_qm_models.git#790c6b192a401d8a45ffce1b097a09949400f67b" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pydantic" },
+    { name = "simstack" },
+]
+
+[[package]]
+name = "molecular-qm-orca"
+version = "0.1.0"
+source = { git = "https://github.com/simstack/molecular_qm_orca.git#8e46cd954fd044108ad3b62076b55cc1c5d53d57" }
+dependencies = [
+    { name = "molecular-qm-models" },
+    { name = "simstack" },
 ]
 
 [[package]]
@@ -592,6 +613,8 @@ name = "simstack-control"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "molecular-qm-models" },
+    { name = "molecular-qm-orca" },
     { name = "simstack" },
 ]
 
@@ -603,7 +626,11 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "simstack", git = "https://github.com/simstack/simstack.git?rev=ww%2Fnew-features" }]
+requires-dist = [
+    { name = "molecular-qm-models", git = "https://github.com/simstack/molecular_qm_models.git" },
+    { name = "molecular-qm-orca", git = "https://github.com/simstack/molecular_qm_orca.git" },
+    { name = "simstack", git = "https://github.com/simstack/simstack.git?rev=ww%2Fnew-features" },
+]
 
 [package.metadata.requires-dev]
 dev = [

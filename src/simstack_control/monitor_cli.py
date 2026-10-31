@@ -10,7 +10,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--list",
         action="store_true",
-        help="Print jobs from the database selected by simstack.toml.",
+        help="Print uuid, name, custom_name, category, and status for each job.",
     )
     parser.add_argument("--node-name", help="Keep jobs with this node name.")
     parser.add_argument("--status", help="Keep jobs with this status.")
@@ -32,6 +32,23 @@ def parse_status(status: str | None):
     return TaskStatus(status)
 
 
+def job_summary(document: dict) -> dict:
+    document_id = document.get("_id")
+    if document_id is None:
+        raise ValueError("NodeRegistry document has no _id")
+    if "name" not in document:
+        raise ValueError(f"NodeRegistry {document_id} has no name")
+    if "status" not in document:
+        raise ValueError(f"NodeRegistry {document_id} has no status")
+    return {
+        "uuid": str(document_id),
+        "name": document["name"],
+        "custom_name": document["custom_name"] if "custom_name" in document else None,
+        "category": document["category"] if "category" in document else None,
+        "status": document["status"],
+    }
+
+
 async def _main() -> None:
     args = build_parser().parse_args()
     if not args.list:
@@ -44,19 +61,19 @@ async def _main() -> None:
 
     from simstack_control.session import simstack_session
 
-    filters = []
+    query: dict = {}
     if args.node_name is not None:
-        filters.append(NodeRegistry.name == args.node_name)
+        query["name"] = args.node_name
     if status is not None:
-        filters.append(NodeRegistry.status == status)
+        query["status"] = status.value
 
     async with simstack_session() as context:
-        jobs = await context.db.find(
-            NodeRegistry,
-            *filters,
-            sort=NodeRegistry.created_at.desc(),
+        cursor = (
+            context.db.collection(NodeRegistry)
+            .find(query, {"name": 1, "custom_name": 1, "category": 1, "status": 1})
+            .sort("created_at", -1)
         )
-        write_json([job.model_dump() for job in jobs])
+        write_json([job_summary(document) async for document in cursor])
 
 
 def main() -> None:

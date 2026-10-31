@@ -10,6 +10,8 @@ authors = [
 ]
 dependencies = [
     "simstack",
+    "molecular_qm_models",
+    "molecular_qm_orca",
 ]
 
 [project.scripts]
@@ -27,10 +29,14 @@ packages = ["src/simstack_control"]
 
 [tool.uv.sources]
 simstack = { git = "https://github.com/simstack/simstack.git", rev = "ww/new-features" }
+molecular_qm_models = { git = "https://github.com/simstack/molecular_qm_models.git" }
+molecular_qm_orca = { git = "https://github.com/simstack/molecular_qm_orca.git" }
 
 [tool.uv]
 override-dependencies = [
     "simstack @ git+https://github.com/simstack/simstack.git@ww/new-features",
+    "molecular_qm_models @ git+https://github.com/simstack/molecular_qm_models.git",
+    "molecular_qm_orca @ git+https://github.com/simstack/molecular_qm_orca.git",
     "numpy==2.5.0",
 ]
 constraint-dependencies = [
