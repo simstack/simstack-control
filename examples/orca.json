@@ -1,0 +1,10 @@
+{
+  "method": "DFT",
+  "charge": 0,
+  "multiplicity": 1,
+  "optimization": false,
+  "functional": "B3LYP",
+  "dispersion": "D3",
+  "basis-set": "def2-SVP",
+  "aux-basis": "none"
+}

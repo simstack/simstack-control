@@ -55,6 +55,16 @@ simstack_submit --node-name node_name --resource resource --params params.json i
 }
 ```
 
+## submit_orca
+
+```bash
+python examples/submit_orca.py --parameters orca.json --resource jusuf molecule.xyz
+```
+
+`orca.json` is a short settings file. It has no molecule. Required keys are `basis-set`, `aux-basis`, `functional`, `dispersion`, `method`, `charge`, `multiplicity`, and `optimization`. Optional keys include `states`, `focus-states` (required when `states` is greater than 0), `frequencies`, solvent, and the other `OrcaQMInput` settings. The geometry comes from `molecule.xyz`.
+
+The script builds the `qm_input` object that `simstack_submit --node-name orca` reads and submits that node. `orca_input.json` in the repository root is that object for water. `examples/orca.json` and `examples/water.xyz` are the short inputs that produce it. `examples/formaldehyde.xyz` is another geometry for the same settings.
+
 ## simstack_monitor
 
 ```bash
