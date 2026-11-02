@@ -1,0 +1,15 @@
+{
+  "basis-set": "def2-SVP",
+  "aux-basis": "def2/J",
+  "functional": "B3LYP",
+  "dispersion": "D3",
+  "method": "DFT",
+  "charge": 0,
+  "multiplicity": 1,
+  "optimization": true,
+  "optimization-accuracy": "Medium",
+  "frequencies": true,
+  "dipole": true,
+  "hyperpol": true,
+  "hyperpol-frequency-nm": 1064
+}

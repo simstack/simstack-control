@@ -123,6 +123,32 @@ class TestGoldenDocument:
         assert built["restart_files"] == {"elements": []}
 
 
+class TestNitrobenzeneGolden:
+    """Golden test for the opt + freq + dipol + hyperpol smoke-test input."""
+
+    def test_matches_root_golden_file(self):
+        golden = json.loads(
+            (REPO_ROOT / "orca_jinja_nitrobenzene_input.json").read_text()
+        )
+        settings = json.loads((EXAMPLES / "nitrobenzene_jinja.json").read_text())
+        xyz = (EXAMPLES / "nitrobenzene.xyz").read_text()
+        document = build_orca_jinja_submit_input(settings, xyz)
+        assert document == golden
+
+    def test_calculation_features_are_forwarded(self):
+        settings = json.loads((EXAMPLES / "nitrobenzene_jinja.json").read_text())
+        xyz = (EXAMPLES / "nitrobenzene.xyz").read_text()
+        built = build_orca_jinja_submit_input(settings, xyz)["qm_input"]
+        assert built["optimization"] is True
+        assert built["optimization_accuracy"] == "Medium"
+        assert built["frequencies"] is True
+        assert built["Dipole"] is True
+        assert built["Hyperpol"] is True
+        assert built["HyperpolFrequencynm"] == 1064.0
+        assert built["compute_properties"] is True
+        assert len(built["molecule"]["atoms"]) == 14
+
+
 class TestParameterValidation:
     def test_missing_required_key(self):
         settings = water_settings()
