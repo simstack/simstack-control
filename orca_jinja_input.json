@@ -1,0 +1,92 @@
+{
+ "qm_input": {
+  "field_name": "QMInput",
+  "molecule": {
+   "field_name": "Molecule",
+   "atoms": [
+    {
+     "field_name": "Atom",
+     "element": "O",
+     "x": 0.0,
+     "y": 0.0,
+     "z": 0.117,
+     "properties": {}
+    },
+    {
+     "field_name": "Atom",
+     "element": "H",
+     "x": 0.0,
+     "y": 0.755,
+     "z": -0.471,
+     "properties": {}
+    },
+    {
+     "field_name": "Atom",
+     "element": "H",
+     "x": 0.0,
+     "y": -0.755,
+     "z": -0.471,
+     "properties": {}
+    }
+   ],
+   "properties": {},
+   "smiles": null,
+   "formula": null
+  },
+  "charge": 0,
+  "multiplicity": 1,
+  "open_shell_calculation": false,
+  "basis_set": {
+   "field_name": "BasisSet",
+   "basis_set": "def2-SVP",
+   "aux_basis": {
+    "field_name": "AuxBasis",
+    "aux_basis": "none"
+   }
+  },
+  "functional": {
+   "field_name": "Functional",
+   "functional": "B3LYP",
+   "dispersion_correction": {
+    "field_name": "DispersionCorrection",
+    "value": "D3"
+   }
+  },
+  "method": "DFT",
+  "gradients": false,
+  "optimization": false,
+  "frequencies": false,
+  "solvent": "None",
+  "solvent_model": "CPCM",
+  "use_solvent": false,
+  "print_level": 1,
+  "scf_accuracy": "Medium",
+  "optimization_accuracy": "Medium",
+  "grid_type": "Grid2",
+  "grid_spacing": 0.2,
+  "max_scf_iterations": 100,
+  "max_optimization_iterations": 100,
+  "first_line": "",
+  "blocks": [],
+  "Dipole": false,
+  "Quadrupole": false,
+  "Polar": false,
+  "Hyperpol": false,
+  "HyperpolFrequencynm": 0.0,
+  "PolarVelocity": false,
+  "PolarDipQuad": false,
+  "PolarQuadQuad": false,
+  "states": 0,
+  "focus_state": 1,
+  "active_electrons": 0,
+  "active_orbitals": 0,
+  "restart_files": {
+   "elements": []
+  },
+  "tolerate_failure": false,
+  "excited_states": false,
+  "compute_properties": false,
+  "non_standard_inputs": false,
+  "non_standard_parameters": false
+ }
+}

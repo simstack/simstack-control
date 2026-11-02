@@ -17,6 +17,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--custom-name", help="Optional display name.")
     parser.add_argument("--category", help="Optional category.")
     parser.add_argument(
+        "--version",
+        help="Version string stored in the NodeRegistry row. Defaults to the "
+        "node function's _node_version attribute when not given. On the "
+        "compatible_old branch legacy nodes have no _node_version, so pass "
+        "--version compatible_old explicitly (submit_orca_jinja.py does).",
+    )
+    parser.add_argument(
         "--params",
         help="JSON object of SlurmParameters for this job, such as nodes and tasks.",
     )
@@ -52,6 +59,13 @@ def _nonempty_optional(flag: str, value: str | None) -> str | None:
     return value
 
 
+def resolve_node_version(version: str | None, func: Any) -> str | None:
+    """Resolve the version written to the NodeRegistry row."""
+    if version is not None:
+        return version
+    return getattr(func, "_node_version", None)
+
+
 async def submit_inputs(
     node_name: str,
     resource: str,
@@ -59,6 +73,7 @@ async def submit_inputs(
     custom_name: str | None = None,
     category: str | None = None,
     slurm_parameters: Any = None,
+    version: str | None = None,
 ) -> str:
     if not isinstance(node_name, str) or node_name.strip() == "":
         raise ValueError("--node-name must be a non-empty string")
@@ -66,6 +81,7 @@ async def submit_inputs(
         raise ValueError("--resource must be a non-empty string")
     custom_name = _nonempty_optional("--custom-name", custom_name)
     category = _nonempty_optional("--category", category)
+    version = _nonempty_optional("--version", version)
 
     from odmantic import Model
     from simstack.core.definitions import TaskStatus
@@ -170,7 +186,9 @@ async def submit_inputs(
             status=TaskStatus.SUBMITTED,
             custom_name=custom_name,
             category=category,
-            version=getattr(func, "_node_version", None),
+            # Legacy simstack has no _node_version, so an explicit --version is
+            # used verbatim; otherwise fall back to the decorated attribute.
+            version=resolve_node_version(version, func),
             project=project_id,
             call_path="." + node_model.name,
             input_references=references,
@@ -200,6 +218,7 @@ async def _main() -> None:
             slurm_parameters=(
                 None if params_path is None else load_json_file(params_path)
             ),
+            version=args.version,
         )
     )
 

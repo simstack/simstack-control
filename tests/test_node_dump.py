@@ -5,11 +5,11 @@ from simstack_control.inspect_cli import (
 
 
 def test_orca_input_resolves_molecule_and_skips_file_stacks():
-    from molecular_qm_orca.models.orca_qm_input import OrcaQMInput
+    from molecular_qm_models.qm_input import QMInput
 
-    referenced = _referenced_model_fields(OrcaQMInput)
+    referenced = _referenced_model_fields(QMInput)
     assert referenced["molecule"].__name__ == "Molecule"
-    assert "restart_files" in _file_stack_field_names(OrcaQMInput)
+    assert "restart_files" in _file_stack_field_names(QMInput)
     assert "restart_files" not in referenced
 
 

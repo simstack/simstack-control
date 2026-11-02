@@ -55,15 +55,50 @@ simstack_submit --node-name node_name --resource resource --params params.json i
 }
 ```
 
-## submit_orca
+## submit_orca_jinja (compatible_old branch)
+
+This branch targets the **legacy** simstack-model environment pinned in
+`pyproject.toml` (`simstack==v2.0.1.post1`, `molecular_qm_models@72f8dcb`,
+`numpy==2.4.1`).  It submits the legacy ``orca_jinja`` node whose qm_input
+schema is the legacy ``molecular_qm_models.qm_input.QMInput`` document — not
+the new-world ``OrcaQMInput`` (which does not exist at the pinned revisions
+and was removed together with the old ``examples/submit_orca.py``).
 
 ```bash
-python examples/submit_orca.py --parameters orca.json --resource jusuf molecule.xyz
+python examples/submit_orca_jinja.py \
+    --parameters examples/orca_jinja.json \
+    --resource justus-test-alt-core-version \
+    examples/water.xyz
 ```
 
-`orca.json` is a short settings file. It has no molecule. Required keys are `basis-set`, `aux-basis`, `functional`, `dispersion`, `method`, `charge`, `multiplicity`, and `optimization`. Optional keys include `states`, `focus-states` (required when `states` is greater than 0), `frequencies`, solvent, and the other `OrcaQMInput` settings. The geometry comes from `molecule.xyz`.
+- `orca_jinja.json` is a short settings file without a molecule. Required
+  keys are `basis-set`, `aux-basis`, `functional`, `dispersion`, `method`,
+  `charge`, `multiplicity`, and `optimization`. Optional keys include
+  `states`/`focus-states`, `frequencies`, `gradients`, solvent (with
+  `solvent-model`), the electrical-property toggles, and `frozen-atoms`
+  (0-based atom indices pinned during geometry optimization).
+- `water.xyz` is the geometry. `orca_jinja_input.json` in the repository
+  root is the exact document built for water — a ready-to-submit input file.
+- Optional slurm overrides: `--params examples/justus-params.json`
+  (partition `nano`, 16 tasks per node, 20G, 200 h — matching the jobs that
+  already run on `justus-test-alt-core-version`).
+- `--node-name` defaults to `orca_jinja`; other legacy variants such as
+  `orca_jinja_no_restart_from_gbw` can be passed explicitly.
+- `--version` defaults to `compatible_old`. The legacy nodes have no
+  `_node_version`, so `submit_inputs` writes the explicit version into the
+  `NodeRegistry` row. This makes agent jobs identifiable while the running
+  production battery keeps `version: null`.
 
-The script builds the `qm_input` object that `simstack_submit --node-name orca` reads and submits that node. `orca_input.json` in the repository root is that object for water. `examples/orca.json` and `examples/water.xyz` are the short inputs that produce it. `examples/formaldehyde.xyz` is another geometry for the same settings.
+Requirements:
+
+- The simstack-model checkout (with the legacy `applications/` tree) must be
+  importable — the example adds the sibling directory `../simstack-model` to
+  `sys.path` automatically, or set `SIMSTACK_MODEL_DIR`. The client does not
+  install the runner-only `molecular_qm_util`/`pymatgen`/openbabel packages;
+  `simstack_control.legacy_apps` provides import-time stand-ins so the node
+  function can be introspected for submission.
+- A local `simstack.toml` with the justus DB credential (copy
+  `simstack-model/justus.toml` to `simstack.toml` in this repository).
 
 ## simstack_monitor
 

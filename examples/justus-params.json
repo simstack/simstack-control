@@ -1,0 +1,6 @@
+{
+  "partition": "nano",
+  "tasks_per_node": 16,
+  "mem": "20G",
+  "time": "200:00:00"
+}
