@@ -42,7 +42,7 @@ class TestParser:
                 "--parameters",
                 "x.json",
                 "--resource",
-                "justus-test-alt-core-version",
+                "justus-jinja",
                 "--params",
                 "p.json",
                 "--custom-name",
@@ -56,7 +56,7 @@ class TestParser:
                 "mol.xyz",
             ]
         )
-        assert args.resource == "justus-test-alt-core-version"
+        assert args.resource == "justus-jinja"
         assert args.node_name == "custom_orca_jinja_node"
         assert args.version == "compatible_old"
 
@@ -64,6 +64,17 @@ class TestParser:
         golden = json.loads((REPO_ROOT / "orca_jinja_input.json").read_text())
         document = build_orca_jinja_submit_input(water_settings(), water_xyz())
         assert document == golden
+
+    def test_builds_nitrobenzene_same_document_as_root_golden(self):
+        golden = json.loads(
+            (REPO_ROOT / "orca_jinja_nitrobenzene_input.json").read_text()
+        )
+        settings = json.loads((EXAMPLES / "nitrobenzene_jinja.json").read_text())
+        xyz = (EXAMPLES / "nitrobenzene.xyz").read_text()
+        document = build_orca_jinja_submit_input(settings, xyz)
+        assert document == golden
+        assert golden["qm_input"]["functional"]["functional"] == "CAM-B3LYP"
+        assert golden["qm_input"]["Hyperpol"] is True
 
     def test_example_uses_the_legacy_builder(self):
         from simstack_control import legacy_qm_input as lqi

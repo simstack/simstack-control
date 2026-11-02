@@ -134,7 +134,7 @@
   },
   "functional": {
    "field_name": "Functional",
-   "functional": "B3LYP",
+   "functional": "CAM-B3LYP",
    "dispersion_correction": {
     "field_name": "DispersionCorrection",
     "value": "D3"

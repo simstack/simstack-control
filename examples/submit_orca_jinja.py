@@ -1,7 +1,7 @@
 """Submit the legacy ``orca_jinja`` node from a short parameters file and XYZ.
 
     python examples/submit_orca_jinja.py --parameters examples/orca_jinja.json \\
-        --resource justus-test-alt-core-version examples/water.xyz
+        --resource justus-jinja --params examples/justus-params.json examples/water.xyz
 
 The parameters file uses the calculation settings of the legacy
 ``orca_jinja`` node (see ``examples/orca_jinja.json``) without a molecule.

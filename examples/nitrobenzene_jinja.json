@@ -1,7 +1,7 @@
 {
   "basis-set": "def2-SVP",
   "aux-basis": "def2/J",
-  "functional": "B3LYP",
+  "functional": "CAM-B3LYP",
   "dispersion": "D3",
   "method": "DFT",
   "charge": 0,

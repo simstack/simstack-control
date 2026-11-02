@@ -67,7 +67,8 @@ and was removed together with the old ``examples/submit_orca.py``).
 ```bash
 python examples/submit_orca_jinja.py \
     --parameters examples/orca_jinja.json \
-    --resource justus-test-alt-core-version \
+    --resource justus-jinja \
+    --params examples/justus-params.json \
     examples/water.xyz
 ```
 
@@ -80,8 +81,11 @@ python examples/submit_orca_jinja.py \
 - `water.xyz` is the geometry. `orca_jinja_input.json` in the repository
   root is the exact document built for water — a ready-to-submit input file.
 - Optional slurm overrides: `--params examples/justus-params.json`
-  (partition `nano`, 16 tasks per node, 20G, 200 h — matching the jobs that
-  already run on `justus-test-alt-core-version`).
+  (1 node, 16 `tasks_per_node` with 1 `cpus_per_task`, 20G, 200 h — no
+  `partition` and no `tasks`; justus runs all jobs in parallel and the
+  int-nano `partition` default is meaningless there. Walltime is capped at
+  14 days). The overrides are merged on top of the node defaults, so
+  `tasks`/`partition` are explicitly nulled when given.
 - `--node-name` defaults to `orca_jinja`; other legacy variants such as
   `orca_jinja_no_restart_from_gbw` can be passed explicitly.
 - `--version` defaults to `compatible_old`. The legacy nodes have no
