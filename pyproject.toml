@@ -11,7 +11,6 @@ authors = [
 dependencies = [
     "simstack",
     "molecular_qm_models",
-    "molecular_qm_orca",
 ]
 
 [project.scripts]
@@ -28,19 +27,20 @@ build-backend = "hatchling.build"
 packages = ["src/simstack_control"]
 
 [tool.uv.sources]
-simstack = { git = "https://github.com/simstack/simstack.git", rev = "ww/new-features" }
-molecular_qm_models = { git = "https://github.com/simstack/molecular_qm_models.git" }
-molecular_qm_orca = { git = "https://github.com/simstack/molecular_qm_orca.git" }
+# compatible_old: pinned to the legacy simstack-model environment
+# (simstack==2.0.1.post1 == commit 25346d7e155865cfc69fceec7a2b7afca08b9011)
+simstack = { git = "https://github.com/simstack/simstack.git", rev = "v2.0.1.post1" }
+molecular_qm_models = { git = "https://github.com/simstack/molecular_qm_models.git", rev = "72f8dcb49f17214d8899c6a80fb8fcfc2063074c" }
 
 [tool.uv]
 override-dependencies = [
-    "simstack @ git+https://github.com/simstack/simstack.git@ww/new-features",
-    "molecular_qm_models @ git+https://github.com/simstack/molecular_qm_models.git",
-    "molecular_qm_orca @ git+https://github.com/simstack/molecular_qm_orca.git",
-    "numpy==2.5.0",
+    # compatible_old: mirror the legacy simstack-model environment
+    "simstack @ git+https://github.com/simstack/simstack.git@v2.0.1.post1",
+    "molecular_qm_models @ git+https://github.com/simstack/molecular_qm_models.git@72f8dcb49f17214d8899c6a80fb8fcfc2063074c",
+    "numpy==2.4.1",
 ]
 constraint-dependencies = [
-    "numpy==2.5.0",
+    "numpy==2.4.1",
 ]
 
 [dependency-groups]
