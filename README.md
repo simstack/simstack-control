@@ -55,17 +55,20 @@ simstack_submit --node-name node_name --resource resource --params params.json i
 }
 ```
 
-## submit_orca_jinja (compatible_old branch)
+## submit_orca_scratch (compatible_old branch)
 
 This branch targets the **legacy** simstack-model environment pinned in
 `pyproject.toml` (`simstack==v2.0.1.post1`, `molecular_qm_models@72f8dcb`,
-`numpy==2.4.1`).  It submits the legacy ``orca_jinja`` node whose qm_input
+`numpy==2.4.1`).  It submits the legacy ``orca_scratch`` node whose qm_input
 schema is the legacy ``molecular_qm_models.qm_input.QMInput`` document — not
 the new-world ``OrcaQMInput`` (which does not exist at the pinned revisions
 and was removed together with the old ``examples/submit_orca.py``).
+``orca_scratch`` always executes ORCA from the resource's scratch filesystem
+(``use_tmp = true`` on justus-jinja) and copies the results back into
+``orca_scratch/<task_id>/`` on the server.
 
 ```bash
-python examples/submit_orca_jinja.py \
+python examples/submit_orca_scratch.py \
     --parameters examples/orca_jinja.json \
     --resource justus-jinja \
     --params examples/justus-params.json \
@@ -79,15 +82,17 @@ python examples/submit_orca_jinja.py \
   `solvent-model`), the electrical-property toggles, and `frozen-atoms`
   (0-based atom indices pinned during geometry optimization).
 - `water.xyz` is the geometry. `orca_jinja_input.json` in the repository
-  root is the exact document built for water — a ready-to-submit input file.
+  root is the exact document built for water — a ready-to-submit input file
+  (node-name independent).
 - Optional slurm overrides: `--params examples/justus-params.json`
   (1 node, 16 `tasks_per_node` with 1 `cpus_per_task`, 20G, 200 h — no
   `partition` and no `tasks`; justus runs all jobs in parallel and the
   int-nano `partition` default is meaningless there. Walltime is capped at
   14 days). The overrides are merged on top of the node defaults, so
   `tasks`/`partition` are explicitly nulled when given.
-- `--node-name` defaults to `orca_jinja`; other legacy variants such as
-  `orca_jinja_no_restart_from_gbw` can be passed explicitly.
+- `--node-name` defaults to `orca_scratch` (scratch always); the plain
+  `orca_jinja` node (legacy, no scratch) can be passed explicitly via
+  `--node-name orca_jinja` for diagnostics only.
 - `--version` defaults to `compatible_old`. The legacy nodes have no
   `_node_version`, so `submit_inputs` writes the explicit version into the
   `NodeRegistry` row. This makes agent jobs identifiable while the running

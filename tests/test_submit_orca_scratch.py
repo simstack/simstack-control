@@ -1,4 +1,4 @@
-"""Tests for the legacy orca_jinja submit example and version handling.
+"""Tests for the legacy orca_scratch submit example and version handling.
 
 The example module is imported from ``examples`` (configured via pytest's
 ``pythonpath``), mirroring the conventions of the removed ``submit_orca``
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-import submit_orca_jinja as example
+import submit_orca_scratch as example
 from simstack_control.legacy_qm_input import build_orca_jinja_submit_input
 from simstack_control.submit_cli import resolve_node_version, submit_inputs
 
@@ -33,7 +33,7 @@ class TestParser:
             ["--parameters", "x.json", "--resource", "r", "mol.xyz"]
         )
         assert args.version == example.DEFAULT_VERSION
-        assert args.node_name == "orca_jinja"
+        assert args.node_name == "orca_scratch"
         assert args.params is None
 
     def test_all_flags(self):

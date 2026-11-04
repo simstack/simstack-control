@@ -1,11 +1,13 @@
-"""Submit the legacy ``orca_jinja`` node from a short parameters file and XYZ.
+"""Submit the ``orca_scratch`` node from a short parameters file and XYZ.
 
-    python examples/submit_orca_jinja.py --parameters examples/orca_jinja.json \\
+    python examples/submit_orca_scratch.py --parameters examples/orca_jinja.json \\
         --resource justus-jinja --params examples/justus-params.json examples/water.xyz
 
-The parameters file uses the calculation settings of the legacy
-``orca_jinja`` node (see ``examples/orca_jinja.json``) without a molecule.
-Required keys are ``basis-set``, ``aux-basis``, ``functional``,
+The ``orca_scratch`` node executes ORCA from the resource's scratch filesystem
+(``use_tmp = true`` in the justus resource config) and copies the results back
+into ``orca_scratch/<task_id>/`` on the server — **scratch execution is always
+used** for agent jobs. The parameters file uses the calculation settings without
+a molecule: required keys are ``basis-set``, ``aux-basis``, ``functional``,
 ``dispersion``, ``method``, ``charge``, ``multiplicity``, and ``optimization``.
 ``states`` and ``focus-states`` are optional; ``focus-states`` is required
 when ``states`` is greater than 0.  The XYZ file supplies the molecule.
@@ -15,6 +17,10 @@ builds the legacy ``molecular_qm_models.qm_input.QMInput`` document (not the
 new-world ``OrcaQMInput``) that the legacy simstack-model runner on justus
 expects, and writes ``NodeRegistry.version = "compatible_old"`` so agent jobs
 can be told apart from the production battery (which stores ``version: null``).
+
+The plain ``orca_jinja`` node remains available for diagnostics via an
+explicit ``--node-name orca_jinja`` override, but the default (and the
+intended path for all agent tooling) is ``orca_scratch`` — scratch always.
 """
 
 import argparse
@@ -27,14 +33,14 @@ from simstack_control.legacy_apps import import_legacy_orca_node
 from simstack_control.legacy_qm_input import build_orca_jinja_submit_input
 
 DEFAULT_VERSION = "compatible_old"
-DEFAULT_NODE_NAME = "orca_jinja"
+DEFAULT_NODE_NAME = "orca_scratch"
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="submit_orca_jinja",
+        prog="submit_orca_scratch",
         description=(
-            "Build the legacy orca_jinja qm_input document from a short "
+            "Build the legacy orca_scratch qm_input document from a short "
             "parameters file and an XYZ geometry, then submit the node."
         ),
     )
@@ -72,7 +78,7 @@ def ensure_applications_importable() -> None:
     """Make the legacy simstack-model ``applications`` tree importable.
 
     ``submit_cli.submit_inputs`` imports the node function
-    ``applications.electronic_structure.orca.orca.orca_jinja`` from the
+    ``applications.electronic_structure.orca.orca.orca_scratch`` from the
     simstack-model checkout.  ``legacy_apps.import_legacy_orca_node`` locates
     that checkout (env ``SIMSTACK_MODEL_DIR`` or the sibling directory) and
     registers a ``molecular_qm_util`` stand-in when the runner-only package
